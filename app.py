@@ -7,11 +7,16 @@ import os
 from apscheduler.schedulers.background import BackgroundScheduler
 import time
 import shutil
+import logging
+from logging.handlers import RotatingFileHandler
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'tu_clave_secreta_aqui')
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///users.db')
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///users.db?check_same_thread=False')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['JSON_SORT_KEYS'] = False
+app.config['SESSION_COOKIE_SECURE'] = False
+app.config['SESSION_COOKIE_HTTPONLY'] = True
 
 db.init_app(app)
 login_manager = LoginManager()
@@ -160,11 +165,37 @@ def downloads(carpeta, archivo):
     return send_from_directory(f"outputs/{carpeta}", archivo, as_attachment=True)
 
 # =========================
+# MANEJO DE ERRORES
+# =========================
+
+@app.errorhandler(500)
+def internal_error(error):
+    db.session.rollback()
+    app.logger.error(f'Error interno: {str(error)}')
+    return f"<h1>❌ Error Interno</h1><p>{str(error)}</p><br><a href='/'>Volver</a>", 500
+
+@app.errorhandler(404)
+def not_found(error):
+    return "<h1>404 - Página no encontrada</h1><a href='/'>Volver</a>", 404
+
+# =========================
 # EJECUTAR
 # =========================
 
 if __name__ == "__main__":
+    if not app.debug:
+        if not os.path.exists('logs'):
+            os.mkdir('logs')
+        file_handler = RotatingFileHandler('logs/app.log', maxBytes=10240000, backupCount=10)
+        file_handler.setFormatter(logging.Formatter(
+            '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'
+        ))
+        file_handler.setLevel(logging.INFO)
+        app.logger.addHandler(file_handler)
+        app.logger.setLevel(logging.INFO)
+        app.logger.info('App startup')
+    
     with app.app_context():
         db.create_all()
     port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port, debug=False)
+    app.run(host='0.0.0.0', port=port, debug=False, threaded=True)
