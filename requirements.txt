@@ -1,0 +1,8 @@
+Flask
+flask-login
+flask-sqlalchemy
+openai-whisper
+yt-dlp
+deep-translator
+apscheduler
+gunicorn

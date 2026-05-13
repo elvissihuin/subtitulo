@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Generador IA
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}"
+    >
+
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>
+            🎬 Generador de Subtítulos IA
+        </h1>
+
+        <p>Bienvenido, {{ current_user.username }}! <a href="/logout">Cerrar Sesión</a></p>
+
+        <form
+            action="/procesar"
+            method="POST"
+        >
+
+            <input
+                type="text"
+                name="url"
+                placeholder="Pega el link del video..."
+                required
+            >
+
+            <select name="subtitulos">
+
+                <option value="Sí">
+                    Generar subtítulos
+                </option>
+
+                <option value="No">
+                    No generar
+                </option>
+
+            </select>
+
+            <select name="traducir">
+
+                <option value="No">
+                    No traducir
+                </option>
+
+                <option value="es">
+                    Español
+                </option>
+
+                <option value="en">
+                    Inglés
+                </option>
+
+                <option value="pt">
+                    Portugués
+                </option>
+
+                <option value="fr">
+                    Francés
+                </option>
+
+            </select>
+
+            <button type="submit">
+
+                🚀 Generar
+
+            </button>
+
+        </form>
+
+    </div>
+
+</body>
+
+</html>
