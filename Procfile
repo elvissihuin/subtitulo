@@ -1,1 +1,2 @@
-web: gunicorn app:app
+# Procfile para Railway con Dockerfile
+# Railway detectará el Dockerfile automáticamente
